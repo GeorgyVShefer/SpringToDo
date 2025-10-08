@@ -1,5 +1,6 @@
 package com.emobile.springtodo.repository;
 
+import com.emobile.springtodo.dto.ToDoDto;
 import com.emobile.springtodo.model.ToDo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -27,22 +28,36 @@ public class ToDoRepository {
         return t;
     }
 
-    // Получить все задачи с пагинацией
-    public List<ToDo> findAll(int limit, int offset) {
-        String sql = """
-            SELECT id, title, description, completed, created_at, updated_at
-            FROM todo
-            ORDER BY id
-            LIMIT ? OFFSET ?
-        """;
+
+    //    public List<ToDo> findAll(int limit, int offset) {
+//        String sql = """
+//            SELECT id, title, description, completed, created_at, updated_at
+//            FROM todo
+//            ORDER BY id
+//            LIMIT ? OFFSET ?
+//        """;
+//        return jdbcTemplate.query(
+//                sql,
+//                new BeanPropertyRowMapper<>(ToDo.class),
+//                limit,
+//                offset
+//        );
+//    }
+// Получить все задачи с пагинацией
+    public List<ToDoDto> findTodos(int limit, int offset) {
+        String sql = "SELECT id, title, description, completed FROM todo ORDER BY id ASC LIMIT ? OFFSET ?";
+
         return jdbcTemplate.query(
                 sql,
-                new BeanPropertyRowMapper<>(ToDo.class),
-                limit,
-                offset
+                new Object[]{limit, offset},
+                (rs, rowNum) -> new ToDoDto(
+                        rs.getLong("id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getBoolean("completed")
+                )
         );
     }
-
 
     // Найти по ID
     public ToDo findById(Long id) {
@@ -58,9 +73,9 @@ public class ToDoRepository {
     public ToDo create(ToDo dto) {
         // 1️⃣ Вставляем запись
         String insertSql = """
-            INSERT INTO todo (title, description, completed, created_at, updated_at)
-            VALUES (?, ?, ?, NOW(), NOW())
-        """;
+                    INSERT INTO todo (title, description, completed, created_at, updated_at)
+                    VALUES (?, ?, ?, NOW(), NOW())
+                """;
 
         jdbcTemplate.update(
                 insertSql,
@@ -71,12 +86,12 @@ public class ToDoRepository {
 
         // 2️⃣ Получаем только что вставленную запись
         String selectSql = """
-            SELECT id, title, description, completed, created_at, updated_at
-            FROM todo
-            WHERE title = ?
-            ORDER BY created_at DESC
-            LIMIT 1
-        """;
+                    SELECT id, title, description, completed, created_at, updated_at
+                    FROM todo
+                    WHERE title = ?
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """;
 
         return jdbcTemplate.queryForObject(
                 selectSql,
@@ -84,14 +99,15 @@ public class ToDoRepository {
                 dto.getTitle()
         );
     }
+
     // Обновить задачу
     public ToDo update(long id, ToDo entity) {
         String sql = """
-            UPDATE todo
-            SET title = ?, description = ?, completed = ?, updated_at = NOW()
-            WHERE id = ?
-            RETURNING *;
-        """;
+                    UPDATE todo
+                    SET title = ?, description = ?, completed = ?, updated_at = NOW()
+                    WHERE id = ?
+                    RETURNING *;
+                """;
 
         return jdbcTemplate.queryForObject(
                 sql,

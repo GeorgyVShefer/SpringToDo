@@ -1,6 +1,7 @@
 package com.emobile.springtodo.controller.api;
 
 
+import com.emobile.springtodo.dto.PaginatedDto;
 import com.emobile.springtodo.dto.ToDoDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,14 +23,13 @@ import java.util.List;
 @RequestMapping("/api/todos")
 public interface ToDoApi {
 
+
+
     @Operation(summary = "Получить все задачи", description = "Возвращает список задач с пагинацией")
-    @ApiResponse(responseCode = "200", description = "Успешно получено",
-            content = @Content(schema = @Schema(implementation = ToDoDto.class)))
-    @GetMapping
-    List<ToDoDto> getAll(
+    @GetMapping()
+    PaginatedDto getPaginatedTodos(
             @RequestParam(defaultValue = "10") int limit,
-            @RequestParam(defaultValue = "0") int offset
-    );
+            @RequestParam(defaultValue = "0") int offset);
 
     @Operation(summary = "Получить задачу по ID")
     @ApiResponse(responseCode = "200", description = "Задача найдена",

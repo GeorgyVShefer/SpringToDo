@@ -1,12 +1,10 @@
 package com.emobile.springtodo.controller.api;
 
 
+import com.emobile.springtodo.dto.PaginatedDto;
 import com.emobile.springtodo.dto.ToDoDto;
 import com.emobile.springtodo.service.ToDoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +18,9 @@ public class ToDoController implements ToDoApi{
     private final ToDoService toDoService;
 
     @Override
-    public List<ToDoDto> getAll(int limit, int offset) {
-        return toDoService.getAll(limit, offset);
+    public PaginatedDto getPaginatedTodos(int limit, int offset) {
+
+        return toDoService.getAllPaginated(limit, offset);
     }
 
     @Override

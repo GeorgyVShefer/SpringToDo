@@ -1,5 +1,6 @@
 package com.emobile.springtodo.service;
 
+import com.emobile.springtodo.dto.PaginatedDto;
 import com.emobile.springtodo.dto.ToDoDto;
 
 import java.util.List;
@@ -13,7 +14,8 @@ public interface ToDoService {
 
     ToDoDto getById(Long id);
 
-    List<ToDoDto> getAll(int limit, int offset);
+    PaginatedDto getAllPaginated(int limit, int offset);
+
 
     void delete(Long id);
 
