@@ -16,6 +16,6 @@ public class PaginatedDto {
     private List<ToDoDto> todos;
     private int limit;
     private int offset;
-    private boolean hasNext; // есть ли следующая страница
+    private boolean hasNext;
 
 }
