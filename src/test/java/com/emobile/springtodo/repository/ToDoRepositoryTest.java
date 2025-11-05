@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ");"
 })
+
 class ToDoRepositoryTest {
 
     @Autowired

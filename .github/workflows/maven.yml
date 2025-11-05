@@ -19,6 +19,25 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tododb
+        options: >-
+          --health-cmd="pg_isready -U postgres -d tododb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      env:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tododb
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
