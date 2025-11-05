@@ -5,7 +5,7 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Копируем собранный jar-файл
-COPY spring-todo-app-0.0.1-SNAPSHOT.jar app.jar
+COPY target/spring-todo-app-0.0.1-SNAPSHOT.jar app.jar
 
 # Открываем порт 8080
 EXPOSE 8080
