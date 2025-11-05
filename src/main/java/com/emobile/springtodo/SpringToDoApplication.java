@@ -7,7 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SpringToDoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringToDoApplication.class, args);
-    }
 
+        SpringApplication.run(SpringToDoApplication.class, args);
+
+
+    }
+    //triggerring        pipelinegi
 }
