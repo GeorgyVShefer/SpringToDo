@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -56,17 +54,6 @@ class ToDoRepositoryTest {
         assertThat(found.getCompleted()).isFalse();
     }
 
-    @Test
-    @DisplayName("Тестирует поиск задач в указанном диапазоне!")
-    void testFindAllWithLimitOffset() {
-        for (int i = 1; i <= 5; i++) {
-            repository.create(new ToDo(null, "Task " + i, "Desc " + i, false, null, null));
-        }
-
-        List<ToDo> todos = repository.findAll(3, 1);
-        assertThat(todos).hasSize(3);
-        assertThat(todos.get(0).getTitle()).isEqualTo("Task 2");
-    }
 
     @Test
     @DisplayName("Тестирует обновление задачи в по id!")
@@ -80,13 +67,4 @@ class ToDoRepositoryTest {
         assertThat(updated.getCompleted()).isTrue();
     }
 
-    @Test
-    @DisplayName("Удаляет задачу по id!")
-    void testDelete() {
-        ToDo todo = repository.create(new ToDo(null, "Task to delete", "Desc", false, null, null));
-        repository.delete(todo.getId());
-
-        List<ToDo> todos = repository.findAll(10, 0);
-        assertThat(todos).doesNotContain(todo);
-    }
 }

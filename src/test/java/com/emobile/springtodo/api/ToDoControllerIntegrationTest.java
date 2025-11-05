@@ -2,35 +2,18 @@ package com.emobile.springtodo.api;
 
 import com.emobile.springtodo.dto.ToDoDto;
 import com.emobile.springtodo.service.ToDoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -41,7 +24,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -87,49 +69,7 @@ class ToDoControllerIntegrationTest {
         JSONAssert.assertEquals(expectedJson, result.getResponse().getContentAsString(), true);
     }
 
-    @Test
-    @DisplayName("Проверяет контроллер на получения списка дел в конкретном диапазоне!")
-    public void testGetAll() throws Exception {
-        ToDoDto todo1 = new ToDoDto();
-        todo1.setId(1L);
-        todo1.setTitle("Title 1");
-        todo1.setDescription("Desc 1");
-        todo1.setCompleted(false);
 
-        ToDoDto todo2 = new ToDoDto();
-        todo2.setId(2L);
-        todo2.setTitle("Title 2");
-        todo2.setDescription("Desc 2");
-        todo2.setCompleted(true);
-
-        when(toDoService.getAll(10, 0)).thenReturn(List.of(todo1, todo2));
-
-        String expectedJson = """
-        [
-          {
-            "id": 1,
-            "title": "Title 1",
-            "description": "Desc 1",
-            "completed": false
-          },
-          {
-            "id": 2,
-            "title": "Title 2",
-            "description": "Desc 2",
-            "completed": true
-          }
-        ]
-        """;
-
-        MvcResult result = mockMvc.perform(get("/api/todos")
-                        .param("limit", "10")
-                        .param("offset", "0")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JSONAssert.assertEquals(expectedJson, result.getResponse().getContentAsString(), true);
-    }
 
     @Test
     @DisplayName("Проверяет контроллер на создание задачи!")

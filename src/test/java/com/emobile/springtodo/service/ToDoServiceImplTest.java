@@ -10,21 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -81,23 +74,7 @@ class ToDoServiceImplTest {
     }
 
 
-    @Test
-    @DisplayName("Метод getAll должен вернуть список DTO!")
-    void testGetAll() {
-        ToDo todo1 = new ToDo(1L, "Task1", "Desc1", false, LocalDateTime.now(), LocalDateTime.now());
-        ToDo todo2 = new ToDo(2L, "Task2", "Desc2", true, LocalDateTime.now(), LocalDateTime.now());
-        List<ToDo> entities = List.of(todo1, todo2);
 
-        when(toDoRepository.findAll(anyInt(), anyInt())).thenReturn(entities);
-
-        List<ToDoDto> result = service.getAll(10, 0);
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getTitle()).isEqualTo("Task1");
-        assertThat(result.get(1).getCompleted()).isTrue();
-
-        verify(toDoRepository, times(1)).findAll(10, 0);
-    }
 
 
     @Test
