@@ -3,8 +3,6 @@ package com.emobile.springtodo.service;
 import com.emobile.springtodo.dto.PaginatedDto;
 import com.emobile.springtodo.dto.ToDoDto;
 
-import java.util.List;
-
 
 public interface ToDoService {
 

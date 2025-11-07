@@ -29,27 +29,16 @@ public class ToDoRepository {
     }
 
 
-    //    public List<ToDo> findAll(int limit, int offset) {
-//        String sql = """
-//            SELECT id, title, description, completed, created_at, updated_at
-//            FROM todo
-//            ORDER BY id
-//            LIMIT ? OFFSET ?
-//        """;
-//        return jdbcTemplate.query(
-//                sql,
-//                new BeanPropertyRowMapper<>(ToDo.class),
-//                limit,
-//                offset
-//        );
-//    }
-// Получить все задачи с пагинацией
+
     public List<ToDoDto> findTodos(int limit, int offset) {
         String sql = "SELECT id, title, description, completed FROM todo ORDER BY id ASC LIMIT ? OFFSET ?";
 
         return jdbcTemplate.query(
                 sql,
-                new Object[]{limit, offset},
+                ps -> {
+                    ps.setInt(1, limit);
+                    ps.setInt(2, offset);
+                },
                 (rs, rowNum) -> new ToDoDto(
                         rs.getLong("id"),
                         rs.getString("title"),
@@ -71,7 +60,7 @@ public class ToDoRepository {
 
     // Добавить задачу
     public ToDo create(ToDo dto) {
-        // 1️⃣ Вставляем запись
+
         String insertSql = """
                     INSERT INTO todo (title, description, completed, created_at, updated_at)
                     VALUES (?, ?, ?, NOW(), NOW())
@@ -84,7 +73,7 @@ public class ToDoRepository {
                 dto.getCompleted() != null && dto.getCompleted()
         );
 
-        // 2️⃣ Получаем только что вставленную запись
+
         String selectSql = """
                     SELECT id, title, description, completed, created_at, updated_at
                     FROM todo
@@ -93,11 +82,15 @@ public class ToDoRepository {
                     LIMIT 1
                 """;
 
-        return jdbcTemplate.queryForObject(
+        List<ToDo> results = jdbcTemplate.query(
                 selectSql,
                 (rs, rowNum) -> mapRow(rs),
                 dto.getTitle()
         );
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+        return results.get(0);
     }
 
     // Обновить задачу

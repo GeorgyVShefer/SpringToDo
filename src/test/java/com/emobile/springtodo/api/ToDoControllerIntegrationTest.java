@@ -39,7 +39,7 @@ class ToDoControllerIntegrationTest {
 
     @Test
     @DisplayName("Проверяет контроллер на получения объекта по id!")
-    public void testGetById() throws Exception {
+     void testGetById() throws Exception {
         // Подготовка мок-объекта
         ToDoDto todo = new ToDoDto();
         todo.setId(1L);
@@ -74,7 +74,7 @@ class ToDoControllerIntegrationTest {
 
     @Test
     @DisplayName("Проверяет контроллер на создание задачи!")
-    public void testCreate() throws Exception {
+     void testCreate() throws Exception {
         ToDoDto inputDto = new ToDoDto();
         inputDto.setTitle("New Todo");
         inputDto.setDescription("New description");
@@ -117,7 +117,7 @@ class ToDoControllerIntegrationTest {
 
     @Test
     @DisplayName("Проверяет контроллер на изменение задачи по id!")
-    public void testUpdate() throws Exception {
+     void testUpdate() throws Exception {
         ToDoDto inputDto = new ToDoDto();
         inputDto.setTitle("Updated Todo");
         inputDto.setDescription("Updated description");
@@ -161,7 +161,7 @@ class ToDoControllerIntegrationTest {
     // ---------------------- delete ----------------------
     @DisplayName("Проверяет контроллер на удаление задачи по id!")
     @Test
-    public void testDelete() throws Exception {
+     void testDelete() throws Exception {
         // Просто проверяем, что сервис вызван и статус 204
         doNothing().when(toDoService).delete(1L);
 
