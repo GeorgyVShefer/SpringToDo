@@ -1,0 +1,48 @@
+stages:
+  - test
+  - build
+  - docker
+test:
+  stage: test
+  image: maven:3.8-openjdk-17
+  script:
+   - mvn clean test
+  only:
+      - merge_requests
+      - dev
+  except:
+    - master
+cache:
+    paths:
+     - .m2/repository/
+     - target/
+build:
+  stage: build
+  image: maven:3.8.6-openjdk-17
+  script:
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 hour
+  only:
+    - merge_requests
+    - dev
+docker-build:
+  stage: docker
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  variables:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_TLS_VERIFY: 1
+      DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD"
+  script:
+    - docker build -t $DOCKER_IMAGE_NAME:latest .
+    - docker push $DOCKER_IMAGE_NAME:latest
+  only:
+    - master
+  dependencies:
+    - build
