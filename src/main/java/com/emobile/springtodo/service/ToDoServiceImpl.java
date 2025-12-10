@@ -1,100 +1,75 @@
 package com.emobile.springtodo.service;
 
-import com.emobile.springtodo.dto.PaginatedDto;
 import com.emobile.springtodo.dto.ToDoDto;
 import com.emobile.springtodo.exception.TaskNotFoundException;
 import com.emobile.springtodo.mapper.ToDoMapper;
-import com.emobile.springtodo.metrics.TaskMetrics;
 import com.emobile.springtodo.model.ToDo;
-import com.emobile.springtodo.repository.ToDoRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import com.emobile.springtodo.repository.ToDoDao;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ToDoServiceImpl implements ToDoService {
 
-    private final TaskMetrics taskMetrics;
-    private final ToDoRepository toDoRepository;
+
+    private final ToDoDao toDoDao;
     private final ToDoMapper mapper;
+    private final ToDoMapper toDoMapper;
 
-    @Override
-    public PaginatedDto getAllPaginated(int limit, int offset) {
-
-        List<ToDoDto> todos = toDoRepository.findTodos(limit, offset);
-        boolean hasNext = todos.size() == limit;
-        return new PaginatedDto(todos, limit, offset, hasNext);
+    public ToDoServiceImpl(SessionFactory sessionFactory, ToDoMapper mapper,
+                           ToDoMapper toDoMapper) {
+        this.toDoDao = new ToDoDao(sessionFactory);
+        this.mapper = mapper;
+        this.toDoMapper = toDoMapper;
     }
 
-    @Override
-    @Cacheable(value = "todos", key = "#id")
-    public ToDoDto getById(Long id) {
-        try {
-            ToDo entityById = toDoRepository.findById(id);
-
-            return mapper.toDto(entityById);
-        } catch (IncorrectResultSizeDataAccessException e) {
-            throw new TaskNotFoundException("Task with id " + id + " not found");
-        }
-
-    }
-
-
-    @Override
-    @CachePut(value = "todos", key = "#result.id")
     public ToDoDto create(ToDoDto dto) {
 
-        ToDo entityToCreate = mapper.toEntity(dto);
+        ToDo entity = mapper.toEntity(dto);
+        Long id = toDoDao.save(entity);
+        ToDo byId = toDoDao.getById(id);
+        return mapper.toDto(byId);
+    }
 
-        ToDo createdEntity = toDoRepository.create(entityToCreate);
+    @Override
+    public ToDoDto update(Long id, ToDoDto toDoDto) {
 
-        ToDoDto result = mapper.toDto(createdEntity);
-
-        if (result.getId() == null) {
-            result.setId(createdEntity.getId());
+        ToDo existingTodo = toDoDao.getById(id);
+        if (existingTodo == null) {
+            throw new TaskNotFoundException("Задача с id: " + id + " не найдена");
         }
 
-        return result;
+        if (toDoDto.getId() != null && !existingTodo.getId().equals(toDoDto.getId())) {
+            throw new TaskNotFoundException("ID в пути и в теле запроса не совпадают");
+        }
+
+
+        existingTodo.setTitle(toDoDto.getTitle());
+        existingTodo.setDescription(toDoDto.getDescription());
+        existingTodo.setUpdatedAt(LocalDateTime.now());
+
+
+        toDoDao.update(existingTodo);
+
+
+        return mapper.toDto(existingTodo);
     }
 
     @Override
-    @CachePut(value = "todos", key = "#id")
-    public ToDoDto update(Long id, ToDoDto dto) {
+    public ToDoDto getById(Long id) {
 
-        ToDo entity = mapper.toEntity(dto);
+        ToDo byId = toDoDao.getById(id);
+        ToDoDto dto = mapper.toDto(byId);
 
-        ToDo updated = toDoRepository.update(id, entity);
-
-        return mapper.toDto(updated);
+        return dto;
     }
 
-
     @Override
-    @CacheEvict(value = "todos", key = "#id")
     public void delete(Long id) {
 
-        toDoRepository.delete(id);
+        toDoDao.deleteById(id);
     }
-
-    @Override
-    public ToDoDto completeTask(Long id) {
-
-        ToDo task = toDoRepository.findById(id);
-        if (!Boolean.TRUE.equals(task.getCompleted())) {
-            task.setCompleted(true);
-            toDoRepository.create(task);
-
-            // Увеличиваем кастомную метрику
-            taskMetrics.incrementCompletedTasks();
-        }
-
-        return new ToDoDto(task.getId(), task.getTitle(), task.getDescription(), task.getCompleted());
-    }
-
 }
