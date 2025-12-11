@@ -4,65 +4,51 @@ import com.emobile.springtodo.dto.ToDoDto;
 import com.emobile.springtodo.exception.TaskNotFoundException;
 import com.emobile.springtodo.mapper.ToDoMapper;
 import com.emobile.springtodo.model.ToDo;
-import com.emobile.springtodo.repository.ToDoDao;
-import org.hibernate.SessionFactory;
+import com.emobile.springtodo.repository.ToDoRepository;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ToDoServiceImpl implements ToDoService {
 
 
-    private final ToDoDao toDoDao;
-    private final ToDoMapper mapper;
-    private final ToDoMapper toDoMapper;
+    private ToDoRepository toDoRepository;
+    private ToDoMapper mapper;
 
-    public ToDoServiceImpl(SessionFactory sessionFactory, ToDoMapper mapper,
-                           ToDoMapper toDoMapper) {
-        this.toDoDao = new ToDoDao(sessionFactory);
+    public ToDoServiceImpl(ToDoRepository toDoRepository, ToDoMapper mapper) {
+        this.toDoRepository = toDoRepository;
         this.mapper = mapper;
-        this.toDoMapper = toDoMapper;
     }
 
     public ToDoDto create(ToDoDto dto) {
 
         ToDo entity = mapper.toEntity(dto);
-        Long id = toDoDao.save(entity);
-        ToDo byId = toDoDao.getById(id);
-        return mapper.toDto(byId);
+        ToDo saveEntity = toDoRepository.save(entity);
+
+        return mapper.toDto(saveEntity);
     }
 
     @Override
     public ToDoDto update(Long id, ToDoDto toDoDto) {
 
-        ToDo existingTodo = toDoDao.getById(id);
-        if (existingTodo == null) {
-            throw new TaskNotFoundException("Задача с id: " + id + " не найдена");
-        }
+        ToDo existingTodo = toDoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Нет пользователя с таким id"));
+
 
         if (toDoDto.getId() != null && !existingTodo.getId().equals(toDoDto.getId())) {
             throw new TaskNotFoundException("ID в пути и в теле запроса не совпадают");
         }
 
-
-        existingTodo.setTitle(toDoDto.getTitle());
-        existingTodo.setDescription(toDoDto.getDescription());
-        existingTodo.setUpdatedAt(LocalDateTime.now());
-
-
-        toDoDao.update(existingTodo);
-
-
+        toDoRepository.save(existingTodo);
         return mapper.toDto(existingTodo);
     }
 
     @Override
     public ToDoDto getById(Long id) {
 
-        ToDo byId = toDoDao.getById(id);
-        ToDoDto dto = mapper.toDto(byId);
+        ToDo entity = toDoRepository.findById(id).orElseThrow(() -> new RuntimeException("Нет пользователя с таким id!"));
+        ToDoDto dto = mapper.toDto(entity);
 
         return dto;
     }
@@ -70,6 +56,6 @@ public class ToDoServiceImpl implements ToDoService {
     @Override
     public void delete(Long id) {
 
-        toDoDao.deleteById(id);
+        toDoRepository.deleteById(id);
     }
 }
